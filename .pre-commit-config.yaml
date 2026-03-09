@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+      - id: sqlfluff-lint
+        name: sqlfluff-lint
+        entry: sqlfluff lint --config .sqlfluff
+        language: system
+        files: ^models/
+        types: [sql]
+      - id: sqlfluff-fix
+        name: sqlfluff-fix
+        entry: sqlfluff fix --config .sqlfluff
+        language: system
+        files: ^models/
+        types: [sql]

@@ -1,0 +1,74 @@
+version: 2
+
+models:
+  - name: stg_ecommerce__order_items
+    description: "Line items from orders"
+    columns:
+      - name: order_item_id
+        description: "Unique identifier for each order line item"
+        # Model tests (run AFTER model is built)
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - unique:
+              config:
+                severity: error
+
+      - name: order_id
+        description: "Foreign key to the orders table"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_ecommerce__orders')
+                field: order_id
+
+      - name: user_id
+        description: "Foreign key to the users table"
+        tests:
+          - not_null
+
+      - name: product_id
+        description: "Foreign key to the products table"
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_ecommerce__products')
+                field: product_id
+
+      - name: status
+        description: "Current status of the order item (e.g. Processing, Shipped, Complete, Returned, Cancelled)"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                    - "Processing"
+                    - "Cancelled"
+                    - "Shipped"
+                    - "Complete"
+                    - "Returned"
+
+      - name: item_sale_price
+        description: "How much the item sold for"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+
+      - name: created_at
+        description: "Timestamp when the order item was created"
+        tests:
+          - not_null
+
+      - name: shipped_at
+        description: "Timestamp when the order item was shipped"
+
+      - name: delivered_at
+        description: "Timestamp when the order item was delivered"
+
+      - name: returned_at
+        description: "Timestamp when the order item was returned"

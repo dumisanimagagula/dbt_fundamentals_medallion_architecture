@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: stg_ecommerce__users
+    description: "Users registered on the ecommerce platform"
+    columns:
+      - name: user_id
+        description: "Unique identifier for each user"
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - unique:
+              config:
+                severity: error
+
+      - name: first_name
+        description: "First name of the user"
+        tests:
+          - not_null
+
+      - name: last_name
+        description: "Last name of the user"
+        tests:
+          - not_null
+
+      - name: email
+        description: "Email address of the user"
+        tests:
+          - not_null
+
+      - name: age
+        description: "Age of the user"
+        tests:
+          - not_null
+
+      - name: gender
+        description: "Gender of the user"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['M', 'F']
+
+      - name: street_address
+        description: "Street address of the user"
+
+      - name: city
+        description: "City of the user"
+        tests:
+          - not_null
+
+      - name: state
+        description: "State of the user"
+        tests:
+          - not_null
+
+      - name: postal_code
+        description: "Postal code of the user"
+
+      - name: country
+        description: "Country of the user"
+        tests:
+          - not_null
+
+      - name: latitude
+        description: "Latitude coordinate of the user's location"
+
+      - name: longitude
+        description: "Longitude coordinate of the user's location"
+
+      - name: traffic_source
+        description: "Source of traffic through which the user was acquired"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Search', 'Organic', 'Facebook', 'Email', 'Display', 'Adwords']
+              config:
+                severity: warn
+
+      - name: created_at
+        description: "Timestamp when the user account was created"
+        tests:
+          - not_null

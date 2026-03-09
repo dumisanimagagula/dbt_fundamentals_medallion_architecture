@@ -1,0 +1,432 @@
+version: 2
+
+models:
+  # ============================================================
+  # DIMENSION MODELS
+  # ============================================================
+
+  - name: dim_customers
+    description: '{{ doc("dim_customers") }}'
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: customer_id
+        description: "Primary key - unique identifier for each customer"
+        data_type: int64
+        tests:
+          - not_null
+          - unique
+
+      - name: first_name
+        description: "Customer first name"
+        data_type: string
+
+      - name: last_name
+        description: "Customer last name"
+        data_type: string
+
+      - name: email
+        description: "Customer email address"
+        data_type: string
+        tests:
+          - not_null
+
+      - name: age
+        description: "Customer age"
+        data_type: int64
+
+      - name: gender
+        description: "Customer gender"
+        data_type: string
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['M', 'F']
+
+      - name: street_address
+        description: "Customer street address"
+        data_type: string
+
+      - name: city
+        description: "Customer city"
+        data_type: string
+
+      - name: state
+        description: "Customer state or region"
+        data_type: string
+
+      - name: postal_code
+        description: "Customer postal code"
+        data_type: string
+
+      - name: country
+        description: "Customer country of residence"
+        data_type: string
+
+      - name: latitude
+        description: "Customer latitude"
+        data_type: float64
+
+      - name: longitude
+        description: "Customer longitude"
+        data_type: float64
+
+      - name: traffic_source
+        description: "Marketing channel that acquired the customer"
+        data_type: string
+
+      - name: customer_created_at
+        description: "When the customer account was created"
+        data_type: timestamp
+        tests:
+          - not_null
+
+      - name: first_order_created_at
+        description: "Timestamp of the customer first order"
+        data_type: timestamp
+
+      - name: total_orders
+        description: "Total number of distinct orders placed"
+        data_type: int64
+
+      - name: total_items_purchased
+        description: "Total number of individual items purchased"
+        data_type: int64
+
+      - name: lifetime_revenue
+        description: "Total revenue from all item sales"
+        data_type: float64
+
+      - name: lifetime_profit
+        description: "Total profit from all item sales"
+        data_type: float64
+
+      - name: lifetime_discount
+        description: "Total discount across all item sales"
+        data_type: float64
+
+      - name: avg_item_sale_price
+        description: "Average sale price per item across all orders"
+        data_type: float64
+
+      - name: customer_type
+        description: "Classification based on purchase frequency"
+        data_type: string
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['never_purchased', 'single_purchase', 'repeat_buyer', 'loyal_customer']
+
+  - name: dim_products
+    description: '{{ doc("dim_products") }}'
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: product_id
+        description: "Primary key - unique identifier for each product"
+        data_type: int64
+        tests:
+          - not_null
+          - unique
+
+      - name: product_sku
+        description: "Product SKU identifier"
+        data_type: string
+
+      - name: product_name
+        description: "Name of the product"
+        data_type: string
+
+      - name: product_category
+        description: "Product category"
+        data_type: string
+        tests:
+          - not_null
+
+      - name: product_brand
+        description: "Product brand name"
+        data_type: string
+
+      - name: product_department
+        description: "Whether the product is Menswear or Womenswear"
+        data_type: string
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Men', 'Women']
+
+      - name: product_cost
+        description: "Cost to the business"
+        data_type: float64
+        tests:
+          - not_null
+
+      - name: product_retail_price
+        description: "Listed retail price"
+        data_type: float64
+        tests:
+          - not_null
+
+      - name: product_margin
+        description: "Retail price minus cost"
+        data_type: float64
+
+      - name: distribution_center_id
+        description: "Foreign key to dim_distribution_centers"
+        data_type: int64
+
+      - name: distribution_center_name
+        description: "Name of the distribution center stocking this product"
+        data_type: string
+
+      - name: distribution_center_latitude
+        description: "Latitude of the distribution center"
+        data_type: float64
+
+      - name: distribution_center_longitude
+        description: "Longitude of the distribution center"
+        data_type: float64
+
+      - name: total_inventory_items
+        description: "Total inventory items created for this product"
+        data_type: int64
+
+      - name: total_sold_items
+        description: "Total inventory items that have been sold"
+        data_type: int64
+
+      - name: items_in_stock
+        description: "Current items available in stock"
+        data_type: int64
+
+  - name: dim_distribution_centers
+    description: '{{ doc("dim_distribution_centers") }}'
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: distribution_center_id
+        description: "Primary key - unique identifier for each distribution center"
+        data_type: int64
+        tests:
+          - not_null
+          - unique
+
+      - name: distribution_center_name
+        description: "Name of the distribution center"
+        data_type: string
+        tests:
+          - not_null
+
+      - name: latitude
+        description: "Distribution center latitude"
+        data_type: float64
+
+      - name: longitude
+        description: "Distribution center longitude"
+        data_type: float64
+
+      - name: total_products
+        description: "Number of distinct products stocked"
+        data_type: int64
+
+      - name: total_inventory_items
+        description: "Total inventory items managed by this center"
+        data_type: int64
+
+      - name: total_sold_items
+        description: "Total items sold from this center"
+        data_type: int64
+
+  # ============================================================
+  # FACT MODELS
+  # ============================================================
+
+  - name: fct_orders
+    description: '{{ doc("fct_orders") }}'
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: order_id
+        description: "Primary key - unique identifier for each order"
+        data_type: int64
+        tests:
+          - not_null
+          - unique
+
+      - name: user_id
+        description: "Foreign key to dim_customers"
+        data_type: int64
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+
+      - name: order_status
+        description: "Current status of the order"
+        data_type: string
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Shipped', 'Complete', 'Returned', 'Cancelled', 'Processing']
+
+      - name: customer_gender
+        description: "Gender of the customer who placed the order"
+        data_type: string
+
+      - name: num_items_ordered
+        description: "Number of items in the order"
+        data_type: int64
+
+      - name: order_created_at
+        description: "When the order was placed"
+        data_type: timestamp
+        tests:
+          - not_null
+
+      - name: order_shipped_at
+        description: "When the order was shipped"
+        data_type: timestamp
+
+      - name: order_delivered_at
+        description: "When the order was delivered"
+        data_type: timestamp
+
+      - name: order_returned_at
+        description: "When the order was returned"
+        data_type: timestamp
+
+      - name: order_created_on_weekend
+        description: "Whether the order was created on a weekend"
+        data_type: bool
+
+      - name: total_sale_price
+        description: "Sum of all item sale prices in the order"
+        data_type: float64
+
+      - name: total_product_cost
+        description: "Sum of all product costs in the order"
+        data_type: float64
+
+      - name: total_profit
+        description: "Total profit for the order"
+        data_type: float64
+
+      - name: total_discount
+        description: "Total discount for the order"
+        data_type: float64
+
+      - name: total_sold_menswear
+        description: "Total menswear revenue in the order"
+        data_type: float64
+
+      - name: total_sold_womenswear
+        description: "Total womenswear revenue in the order"
+        data_type: float64
+
+      - name: days_since_first_order
+        description: "Days between this order and the customer first order"
+        data_type: int64
+
+  - name: fct_order_items
+    description: '{{ doc("fct_order_items") }}'
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: order_item_id
+        description: "Primary key - unique identifier for each order item"
+        data_type: int64
+        tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        description: "Foreign key to fct_orders"
+        data_type: int64
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+
+      - name: user_id
+        description: "Foreign key to dim_customers"
+        data_type: int64
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+
+      - name: product_id
+        description: "Foreign key to dim_products"
+        data_type: int64
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_id
+
+      - name: order_item_status
+        description: "Current status of this line item"
+        data_type: string
+        tests:
+          - not_null
+
+      - name: order_item_created_at
+        description: "When the order item was created"
+        data_type: timestamp
+        tests:
+          - not_null
+
+      - name: shipped_at
+        description: "When the item was shipped"
+        data_type: timestamp
+
+      - name: delivered_at
+        description: "When the item was delivered"
+        data_type: timestamp
+
+      - name: returned_at
+        description: "When the item was returned"
+        data_type: timestamp
+
+      - name: item_sale_price
+        description: "How much the item sold for"
+        data_type: float64
+        tests:
+          - not_null
+
+      - name: product_cost
+        description: "Cost of the product"
+        data_type: float64
+
+      - name: product_retail_price
+        description: "Retail price of the product"
+        data_type: float64
+
+      - name: item_profit
+        description: "item_sale_price minus product_cost"
+        data_type: float64
+        tests:
+          - not_null
+
+      - name: item_discount
+        description: "product_retail_price minus item_sale_price"
+        data_type: float64
+        tests:
+          - not_null
+
+      - name: product_department
+        description: "Department of the product (Men or Women)"
+        data_type: string

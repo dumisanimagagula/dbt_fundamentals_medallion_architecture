@@ -1,0 +1,292 @@
+version: 2
+
+# An example of putting 2 models in the same YML file
+# This has some advantages in being able to use YML anchors (more on that below) that let you
+# reuse descriptions, names, tests etc. across multiple models, whereas
+# dbt document blocks https://docs.getdbt.com/docs/collaborate/documentation#using-docs-blocks
+# can only be used for descriptions.
+# However, a disadvantage is that YML anchors can't be reused across files.
+
+models:
+  - name: int_ecommerce__order_items_products
+    description: "Order item data joined to product data"
+    columns:
+      - name: order_item_id
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - unique:
+              config:
+                severity: error
+
+      - name: order_id
+        tests:
+          - not_null
+
+      # The "&" is a YML anchor which you can reference later in the file
+      - &user_id
+        name: user_id
+        description: "Unique identifier for a user"
+        tests:
+          - not_null
+
+      - name: product_id
+        tests:
+          - not_null
+
+      - name: status
+        description: "Current status of the order item (e.g. Shipped, Complete, Returned, Processing, Cancelled)"
+        tests:
+          - not_null
+
+      - name: created_at
+        description: "Timestamp when the order item was created"
+        tests:
+          - not_null
+
+      - name: shipped_at
+        description: "Timestamp when the order item was shipped"
+
+      - name: delivered_at
+        description: "Timestamp when the order item was delivered"
+
+      - name: returned_at
+        description: "Timestamp when the order item was returned"
+
+      - name: item_sale_price
+        description: "How much the item sold for"
+        tests:
+          - not_null
+
+      - name: product_department
+        description: "Whether the item is Menswear or Womenswear"
+        tests:
+          - not_null
+
+      - name: product_cost
+        description: "How much the product cost the business to purchase"
+        tests:
+          - not_null
+
+      - name: product_retail_price
+        description: "How much the product retails for on the online store"
+        tests:
+          - not_null
+
+      - name: item_profit
+        description: "item_sale_price minus product_cost"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "= (item_sale_price - product_cost)"
+
+      - name: item_discount
+        description: "product_retail_price minus item_sale_price"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "= (product_retail_price - item_sale_price)"
+
+  - name: int_ecommerce__first_order_created
+    description: '{{ doc("int_ecommerce__first_order_created") }}'
+    columns:
+      - name: user_id
+        description: "Unique identifier for a user"
+        tests:
+          - not_null
+          - unique
+
+      - name: first_order_created_at
+        description: "Timestamp of the user's earliest order"
+        tests:
+          - not_null
+
+  - name: int_ecommerce__customers_enriched
+    description: "Users enriched with first order date and lifetime order metrics."
+    columns:
+      - name: user_id
+        description: "Unique identifier for a user"
+        tests:
+          - not_null
+          - unique
+
+      - name: first_name
+      - name: last_name
+      - name: email
+      - name: age
+      - name: gender
+      - name: street_address
+      - name: city
+      - name: state
+      - name: postal_code
+      - name: country
+      - name: latitude
+      - name: longitude
+      - name: traffic_source
+      - name: customer_created_at
+        description: "Timestamp when the user account was created"
+
+      - name: first_order_created_at
+        description: "Timestamp of the user's earliest order"
+
+      - name: total_orders
+        description: "Total number of distinct orders placed by the user"
+        tests:
+          - not_null
+
+      - name: total_items_purchased
+        description: "Total number of items purchased by the user"
+
+      - name: lifetime_revenue
+        description: "Total revenue from all user orders"
+
+      - name: lifetime_profit
+        description: "Total profit from all user orders"
+
+      - name: lifetime_discount
+        description: "Total discount given across all user orders"
+
+      - name: avg_item_sale_price
+        description: "Average sale price per item for the user"
+
+  - name: int_ecommerce__distribution_centers_enriched
+    description: "Distribution centers enriched with product counts and inventory statistics."
+    columns:
+      - name: distribution_center_id
+        description: "Unique identifier for the distribution center"
+        tests:
+          - not_null
+          - unique
+
+      - name: distribution_center_name
+        tests:
+          - not_null
+
+      - name: latitude
+      - name: longitude
+
+      - name: total_products
+        description: "Number of distinct products assigned to this distribution center"
+
+      - name: total_inventory_items
+        description: "Total inventory items at this distribution center"
+
+      - name: total_sold_items
+        description: "Total sold inventory items from this distribution center"
+
+  - name: int_ecommerce__products_enriched
+    description: "Products enriched with distribution center info and inventory statistics."
+    columns:
+      - name: product_id
+        description: "Unique identifier for the product"
+        tests:
+          - not_null
+          - unique
+
+      - name: product_sku
+      - name: product_name
+      - name: product_category
+      - name: product_brand
+      - name: product_department
+      - name: product_cost
+      - name: product_retail_price
+      - name: distribution_center_id
+      - name: distribution_center_name
+      - name: distribution_center_latitude
+      - name: distribution_center_longitude
+
+      - name: product_margin
+        description: "Retail price minus cost"
+
+      - name: total_inventory_items
+        description: "Total inventory items for this product"
+
+      - name: total_sold_items
+        description: "Total sold inventory items for this product"
+
+      - name: items_in_stock
+        description: "Total items currently in stock for this product"
+
+  - name: int_ecommerce__orders_enriched
+    description: "Orders enriched with line-item financial measures and first order context."
+    columns:
+      - name: order_id
+        description: "Unique identifier for the order"
+        tests:
+          - not_null
+          - unique
+
+      - name: user_id
+        tests:
+          - not_null
+
+      - name: order_status
+      - name: customer_gender
+      - name: num_items_ordered
+      - name: order_created_at
+        description: "Timestamp when the order was created"
+        tests:
+          - not_null
+
+      - name: order_shipped_at
+      - name: order_delivered_at
+      - name: order_returned_at
+
+      - name: total_sale_price
+        description: "Sum of item sale prices for the order"
+
+      - name: total_product_cost
+        description: "Sum of product costs for the order"
+
+      - name: total_profit
+        description: "Sum of item profits for the order"
+
+      - name: total_discount
+        description: "Sum of item discounts for the order"
+
+      - name: total_sold_menswear
+        description: "Total menswear sales value for the order"
+
+      - name: total_sold_womenswear
+        description: "Total womenswear sales value for the order"
+
+      - name: first_order_created_at
+        description: "Timestamp of the user's first ever order"
+
+      - name: days_since_first_order
+        description: "Days between this order and the user's first order"
+
+  - name: int_ecommerce__events_enriched
+    description: "Events enriched with user context including traffic source and country."
+    columns:
+      - name: event_id
+        description: "Unique identifier for the event"
+        tests:
+          - not_null
+          - unique
+
+      - name: user_id
+      - name: session_id
+      - name: sequence_number
+      - name: event_type
+      - name: browser
+      - name: event_traffic_source
+      - name: uri
+      - name: ip_address
+      - name: event_city
+      - name: event_state
+      - name: event_postal_code
+
+      - name: event_created_at
+        description: "Timestamp when the event occurred"
+        tests:
+          - not_null
+
+      - name: user_traffic_source
+        description: "Traffic source from the user's profile"
+
+      - name: user_country
+        description: "Country from the user's profile"

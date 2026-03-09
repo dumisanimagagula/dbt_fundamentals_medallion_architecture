@@ -1,0 +1,54 @@
+semantic_models:
+  - name: events
+    description: "Website event fact with event counts, session, and conversion measures."
+    model: ref('fct_events')
+    defaults:
+      agg_time_dimension: event_created_at
+
+    entities:
+      - name: event
+        type: primary
+        expr: event_id
+      - name: customer
+        type: foreign
+        expr: user_id
+
+    dimensions:
+      - name: event_type
+        type: categorical
+      - name: browser
+        type: categorical
+      - name: event_traffic_source
+        type: categorical
+      - name: event_city
+        type: categorical
+      - name: event_state
+        type: categorical
+      - name: user_traffic_source
+        type: categorical
+      - name: user_country
+        type: categorical
+      - name: is_purchase_event
+        type: categorical
+      - name: event_created_at
+        type: time
+        type_params:
+          time_granularity: day
+
+    measures:
+      - name: event_count
+        agg: count
+        expr: event_id
+        description: "Total number of website events"
+      - name: purchase_event_count
+        agg: sum
+        expr: "case when is_purchase_event then 1 else 0 end"
+        description: "Total number of purchase events"
+      - name: unique_sessions
+        agg: count_distinct
+        expr: session_id
+        description: "Number of unique browsing sessions"
+      - name: unique_visitors
+        agg: count_distinct
+        expr: user_id
+        description: "Number of unique visitors"

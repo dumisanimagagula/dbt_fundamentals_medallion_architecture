@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_ecommerce__distribution_centers
+    description: "Distribution centers where products are stored and shipped from"
+    columns:
+      - name: distribution_center_id
+        description: "Unique identifier for each distribution center"
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - unique:
+              config:
+                severity: error
+
+      - name: distribution_center_name
+        description: "Name of the distribution center"
+        tests:
+          - not_null
+
+      - name: latitude
+        description: "Latitude coordinate of the distribution center"
+        tests:
+          - not_null
+
+      - name: longitude
+        description: "Longitude coordinate of the distribution center"
+        tests:
+          - not_null

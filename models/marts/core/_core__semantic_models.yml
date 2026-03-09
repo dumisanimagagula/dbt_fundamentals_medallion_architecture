@@ -1,0 +1,244 @@
+semantic_models:
+  # ============================================================
+  # DIMENSION SEMANTIC MODELS
+  # ============================================================
+
+  - name: customers
+    description: "Customer dimension with demographics, acquisition channel, and lifetime value metrics."
+    model: ref('dim_customers')
+    defaults:
+      agg_time_dimension: customer_created_at
+
+    entities:
+      - name: customer
+        type: primary
+        expr: customer_id
+
+    dimensions:
+      - name: gender
+        type: categorical
+      - name: city
+        type: categorical
+      - name: state
+        type: categorical
+      - name: country
+        type: categorical
+      - name: traffic_source
+        type: categorical
+      - name: customer_type
+        type: categorical
+      - name: customer_created_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: first_order_created_at
+        type: time
+        type_params:
+          time_granularity: day
+
+    measures:
+      - name: customer_count
+        agg: count
+        expr: customer_id
+        description: "Total number of customers"
+      - name: average_customer_age
+        agg: average
+        expr: age
+        description: "Average age of customers"
+      - name: total_customer_lifetime_revenue
+        agg: sum
+        expr: lifetime_revenue
+        description: "Sum of lifetime revenue across all customers"
+      - name: average_customer_lifetime_revenue
+        agg: average
+        expr: lifetime_revenue
+        description: "Average lifetime revenue per customer"
+      - name: total_customer_lifetime_profit
+        agg: sum
+        expr: lifetime_profit
+        description: "Sum of lifetime profit across all customers"
+
+  - name: products
+    description: "Product dimension with category, pricing, and distribution center attributes."
+    model: ref('dim_products')
+
+    entities:
+      - name: product
+        type: primary
+        expr: product_id
+      - name: distribution_center
+        type: foreign
+        expr: distribution_center_id
+
+    dimensions:
+      - name: product_name
+        type: categorical
+      - name: product_category
+        type: categorical
+      - name: product_brand
+        type: categorical
+      - name: product_department
+        type: categorical
+      - name: distribution_center_name
+        type: categorical
+
+  - name: distribution_centers
+    description: "Distribution center dimension with location attributes."
+    model: ref('dim_distribution_centers')
+
+    entities:
+      - name: distribution_center
+        type: primary
+        expr: distribution_center_id
+
+    dimensions:
+      - name: distribution_center_name
+        type: categorical
+
+  # ============================================================
+  # FACT SEMANTIC MODELS
+  # ============================================================
+
+  - name: orders
+    description: "Order-grain fact with revenue, cost, profit, and discount measures."
+    model: ref('fct_orders')
+    defaults:
+      agg_time_dimension: order_created_at
+
+    entities:
+      - name: order
+        type: primary
+        expr: order_id
+      - name: customer
+        type: foreign
+        expr: user_id
+
+    dimensions:
+      - name: order_status
+        type: categorical
+      - name: customer_gender
+        type: categorical
+      - name: order_created_on_weekend
+        type: categorical
+      - name: order_created_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: order_shipped_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: order_delivered_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: order_returned_at
+        type: time
+        type_params:
+          time_granularity: day
+
+    measures:
+      - name: revenue
+        agg: sum
+        expr: total_sale_price
+        description: "Total revenue from order sales"
+      - name: cost_of_goods_sold
+        agg: sum
+        expr: total_product_cost
+        description: "Total cost of goods sold"
+      - name: gross_profit
+        agg: sum
+        expr: total_profit
+        description: "Total gross profit (revenue minus cost)"
+      - name: discount_given
+        agg: sum
+        expr: total_discount
+        description: "Total discount applied across orders"
+      - name: menswear_revenue
+        agg: sum
+        expr: total_sold_menswear
+        description: "Revenue from menswear products"
+      - name: womenswear_revenue
+        agg: sum
+        expr: total_sold_womenswear
+        description: "Revenue from womenswear products"
+      - name: order_count
+        agg: count
+        expr: order_id
+        description: "Total number of orders"
+      - name: items_ordered
+        agg: sum
+        expr: num_items_ordered
+        description: "Total number of items ordered"
+
+  - name: order_items
+    description: "Order line-item grain fact with item-level revenue, cost, and profit measures."
+    model: ref('fct_order_items')
+    defaults:
+      agg_time_dimension: order_item_created_at
+
+    entities:
+      - name: order_item
+        type: primary
+        expr: order_item_id
+      - name: order
+        type: foreign
+        expr: order_id
+      - name: customer
+        type: foreign
+        expr: user_id
+      - name: product
+        type: foreign
+        expr: product_id
+
+    dimensions:
+      - name: order_item_status
+        type: categorical
+      - name: product_department
+        type: categorical
+      - name: order_item_created_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: shipped_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: delivered_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: returned_at
+        type: time
+        type_params:
+          time_granularity: day
+
+    measures:
+      - name: item_revenue
+        agg: sum
+        expr: item_sale_price
+        description: "Total item-level revenue"
+      - name: item_cost
+        agg: sum
+        expr: product_cost
+        description: "Total item-level cost"
+      - name: item_profit
+        agg: sum
+        expr: item_profit
+        description: "Total item-level profit"
+      - name: item_discount
+        agg: sum
+        expr: item_discount
+        description: "Total item-level discount"
+      - name: order_item_count
+        agg: count
+        expr: order_item_id
+        description: "Total number of order line items"
+      - name: distinct_products_sold
+        agg: count_distinct
+        expr: product_id
+        description: "Number of distinct products sold"
+      - name: distinct_customers_purchasing
+        agg: count_distinct
+        expr: user_id
+        description: "Number of distinct customers who made a purchase"

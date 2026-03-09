@@ -1,0 +1,66 @@
+version: 2
+
+exposures:
+
+  - name: executive_dashboard
+    label: Executive Dashboard
+    type: dashboard
+    maturity: high
+    description: '{{ doc("executive_dashboard") }}'
+    depends_on:
+      - metric('revenue')
+      - metric('gross_profit')
+      - metric('gross_profit_margin')
+      - metric('order_count')
+      - metric('average_order_value')
+      - metric('total_customers')
+    owner:
+      name: Analytics Team
+      email: analytics@thelook.com
+
+  - name: product_performance_report
+    label: Product Performance Report
+    type: dashboard
+    maturity: medium
+    description: '{{ doc("product_performance_report") }}'
+    depends_on:
+      - metric('item_revenue')
+      - metric('items_sold')
+      - metric('item_profit')
+      - metric('item_profit_margin')
+      - metric('average_item_price')
+      - metric('distinct_products_sold')
+    owner:
+      name: Analytics Team
+      email: analytics@thelook.com
+
+  - name: marketing_analytics_dashboard
+    label: Marketing Analytics Dashboard
+    type: dashboard
+    maturity: medium
+    description: '{{ doc("marketing_analytics_dashboard") }}'
+    depends_on:
+      - metric('total_events')
+      - metric('purchase_events')
+      - metric('unique_sessions')
+      - metric('unique_visitors')
+      - metric('conversion_rate')
+    owner:
+      name: Marketing Team
+      email: marketing@thelook.com
+
+  - name: order_fulfillment_report
+    label: Order Fulfillment Report
+    type: dashboard
+    maturity: medium
+    description: '{{ doc("order_fulfillment_report") }}'
+    depends_on:
+      - metric('order_count')
+      - metric('items_ordered')
+      - metric('items_per_order')
+      - metric('items_sold')
+      - metric('total_discount')
+      - metric('active_customers')
+    owner:
+      name: Operations Team
+      email: operations@thelook.com

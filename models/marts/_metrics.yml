@@ -1,0 +1,227 @@
+models:
+  - name: metricflow_time_spine
+    description: "Required time spine for the MetricFlow semantic layer."
+    columns:
+      - name: date_day
+        granularity: day
+
+metrics:
+  # ============================================================
+  # REVENUE & PROFITABILITY
+  # ============================================================
+
+  - name: revenue
+    label: "Revenue"
+    description: "Total revenue from all order sales."
+    type: simple
+    type_params:
+      measure: revenue
+
+  - name: cost_of_goods_sold
+    label: "Cost of Goods Sold"
+    description: "Total cost of goods sold across all orders."
+    type: simple
+    type_params:
+      measure: cost_of_goods_sold
+
+  - name: gross_profit
+    label: "Gross Profit"
+    description: "Total gross profit (revenue minus cost of goods sold)."
+    type: simple
+    type_params:
+      measure: gross_profit
+
+  - name: total_discount
+    label: "Total Discount"
+    description: "Total discount applied across all orders."
+    type: simple
+    type_params:
+      measure: discount_given
+
+  - name: gross_profit_margin
+    label: "Gross Profit Margin (%)"
+    description: "Gross profit as a percentage of revenue."
+    type: derived
+    type_params:
+      expr: "gross_profit * 100 / revenue"
+      metrics:
+        - name: gross_profit
+        - name: revenue
+
+  - name: menswear_revenue
+    label: "Menswear Revenue"
+    description: "Total revenue attributed to menswear products."
+    type: simple
+    type_params:
+      measure: menswear_revenue
+
+  - name: womenswear_revenue
+    label: "Womenswear Revenue"
+    description: "Total revenue attributed to womenswear products."
+    type: simple
+    type_params:
+      measure: womenswear_revenue
+
+  # ============================================================
+  # ORDER PERFORMANCE
+  # ============================================================
+
+  - name: order_count
+    label: "Order Count"
+    description: "Total number of orders placed."
+    type: simple
+    type_params:
+      measure: order_count
+
+  - name: items_ordered
+    label: "Items Ordered"
+    description: "Total number of items ordered across all orders."
+    type: simple
+    type_params:
+      measure: items_ordered
+
+  - name: average_order_value
+    label: "Average Order Value"
+    description: "Average revenue per order."
+    type: derived
+    type_params:
+      expr: "revenue / order_count"
+      metrics:
+        - name: revenue
+        - name: order_count
+
+  - name: items_per_order
+    label: "Items per Order"
+    description: "Average number of items per order."
+    type: derived
+    type_params:
+      expr: "items_ordered / order_count"
+      metrics:
+        - name: items_ordered
+        - name: order_count
+
+  # ============================================================
+  # ITEM-LEVEL PERFORMANCE
+  # ============================================================
+
+  - name: item_revenue
+    label: "Item Revenue"
+    description: "Total revenue at the order line-item level."
+    type: simple
+    type_params:
+      measure: item_revenue
+
+  - name: items_sold
+    label: "Items Sold"
+    description: "Total number of order line items sold."
+    type: simple
+    type_params:
+      measure: order_item_count
+
+  - name: item_profit
+    label: "Item Profit"
+    description: "Total profit at the order line-item level."
+    type: simple
+    type_params:
+      measure: item_profit
+
+  - name: average_item_price
+    label: "Average Item Price"
+    description: "Average selling price per item."
+    type: derived
+    type_params:
+      expr: "item_revenue / items_sold"
+      metrics:
+        - name: item_revenue
+        - name: items_sold
+
+  - name: item_profit_margin
+    label: "Item Profit Margin (%)"
+    description: "Item-level profit as a percentage of item revenue."
+    type: derived
+    type_params:
+      expr: "item_profit * 100 / item_revenue"
+      metrics:
+        - name: item_profit
+        - name: item_revenue
+
+  # ============================================================
+  # CUSTOMER
+  # ============================================================
+
+  - name: total_customers
+    label: "Total Customers"
+    description: "Total number of registered customers."
+    type: simple
+    type_params:
+      measure: customer_count
+
+  - name: average_customer_age
+    label: "Average Customer Age"
+    description: "Average age of registered customers."
+    type: simple
+    type_params:
+      measure: average_customer_age
+
+  - name: average_customer_ltv
+    label: "Average Customer Lifetime Value"
+    description: "Average lifetime revenue per customer."
+    type: simple
+    type_params:
+      measure: average_customer_lifetime_revenue
+
+  - name: active_customers
+    label: "Active Customers"
+    description: "Number of distinct customers who have made a purchase."
+    type: simple
+    type_params:
+      measure: distinct_customers_purchasing
+
+  - name: distinct_products_sold
+    label: "Distinct Products Sold"
+    description: "Number of unique products that have been sold."
+    type: simple
+    type_params:
+      measure: distinct_products_sold
+
+  # ============================================================
+  # MARKETING & CONVERSION
+  # ============================================================
+
+  - name: total_events
+    label: "Total Events"
+    description: "Total number of website events tracked."
+    type: simple
+    type_params:
+      measure: event_count
+
+  - name: purchase_events
+    label: "Purchase Events"
+    description: "Total number of purchase events on the website."
+    type: simple
+    type_params:
+      measure: purchase_event_count
+
+  - name: unique_sessions
+    label: "Unique Sessions"
+    description: "Number of unique browsing sessions."
+    type: simple
+    type_params:
+      measure: unique_sessions
+
+  - name: unique_visitors
+    label: "Unique Visitors"
+    description: "Number of unique visitors to the website."
+    type: simple
+    type_params:
+      measure: unique_visitors
+
+  - name: conversion_rate
+    label: "Conversion Rate"
+    description: "Ratio of purchase events to total events."
+    type: ratio
+    type_params:
+      numerator:
+        name: purchase_events
+      denominator:
+        name: total_events

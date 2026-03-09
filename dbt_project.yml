@@ -1,0 +1,33 @@
+
+name: 'thelook_ecommerce'
+version: '1.0.0'
+
+profile: 'thelook_ecommerce'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  thelook_ecommerce:
+    +persist_docs:
+      relation: true
+      columns: true
+    +hours_to_expiration: 168
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: table
+    marts:
+      +materialized: table
+
+tests:
+  thelook_ecommerce:
+    +severity: warn

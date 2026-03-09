@@ -1,0 +1,51 @@
+# Needed for every dbt yml file - https://docs.getdbt.com/faqs/project/why-version-2
+version: 2
+
+sources:
+  - name: thelook_ecommerce
+    description: >-
+      Google BigQuery public dataset simulating an ecommerce clothing store,
+      containing transactional, behavioral, and product data for TheLook online retail platform.
+    # database <> project are interchangeable in dbt-bigquery
+    # project is specific to just dbt-bigquery, whereas database can be used with anything - e.g. Snowflake
+    database: bigquery-public-data
+    tables:
+      - name: distribution_centers
+        description: >-
+          Physical warehouse locations where products are stored and shipped from,
+          identified by unique ID with geographic coordinates and facility name.
+      - name: events
+        description: >-
+          Web behavioral events captured from user interactions on the ecommerce platform,
+          including page visits and actions with session tracking, browser details, traffic source,
+          and geolocation data.
+        config:
+          loaded_at_field: created_at
+          event_time: created_at
+          freshness:
+            warn_after: {count: 12, period: hour}
+            error_after: {count: 24, period: hour}
+      - name: inventory_items
+        description: >-
+          Individual product units held in inventory with full product details
+          (name, category, brand, department, SKU), pricing information (cost and retail price),
+          and timestamps tracking when each unit was created and sold.
+      - name: order_items
+        description: >-
+          Line items from customer orders linking individual products to their parent order,
+          with sale price, fulfillment status, and key timestamps
+          (creation, shipment, delivery, and return).
+      - name: orders
+        description: >-
+          Customer orders at the header level with fulfillment status, customer demographics,
+          item quantity, and lifecycle timestamps (created, shipped, delivered, returned).
+      - name: products
+        description: >-
+          Catalog of products available in the online store with categorization
+          (category, brand, department), identifiers (SKU), pricing (cost and retail price),
+          and the distribution center where each product is stored.
+      - name: users
+        description: >-
+          Registered users of the ecommerce platform with demographic information
+          (name, age, gender), contact details (email, address), geographic coordinates,
+          acquisition channel (traffic source), and account creation timestamp.

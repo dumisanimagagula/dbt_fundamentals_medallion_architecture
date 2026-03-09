@@ -1,0 +1,91 @@
+version: 2
+
+models:
+  - name: fct_events
+    description: '{{ doc("fct_events") }}'
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: event_id
+        description: "Primary key - unique identifier for each event"
+        data_type: int64
+        tests:
+          - not_null
+          - unique
+
+      - name: user_id
+        description: "Foreign key to dim_customers. Null for anonymous visitors."
+        data_type: int64
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+              config:
+                severity: warn
+
+      - name: session_id
+        description: "Session identifier grouping related events"
+        data_type: string
+        tests:
+          - not_null
+
+      - name: sequence_number
+        description: "Order of the event within the session"
+        data_type: int64
+
+      - name: event_type
+        description: "Type of event (e.g., home, department, product, cart, purchase)"
+        data_type: string
+        tests:
+          - not_null
+
+      - name: browser
+        description: "Browser used for the event"
+        data_type: string
+
+      - name: event_traffic_source
+        description: "Traffic source for this specific event/session"
+        data_type: string
+
+      - name: uri
+        description: "Page URI of the event"
+        data_type: string
+
+      - name: ip_address
+        description: "IP address of the event"
+        data_type: string
+
+      - name: event_city
+        description: "City where the event occurred"
+        data_type: string
+
+      - name: event_state
+        description: "State where the event occurred"
+        data_type: string
+
+      - name: event_postal_code
+        description: "Postal code where the event occurred"
+        data_type: string
+
+      - name: event_created_at
+        description: "When the event occurred"
+        data_type: timestamp
+        tests:
+          - not_null
+
+      - name: user_traffic_source
+        description: "Original traffic source that acquired the user"
+        data_type: string
+
+      - name: user_country
+        description: "Country of the user"
+        data_type: string
+
+      - name: is_purchase_event
+        description: "Boolean flag indicating whether this event was a purchase"
+        data_type: bool

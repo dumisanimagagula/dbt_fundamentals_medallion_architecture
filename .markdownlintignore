@@ -1,0 +1,2 @@
+# Vendored third-party dbt packages - don't lint these
+dbt_packages/
